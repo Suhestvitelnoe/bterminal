@@ -1,0 +1,9 @@
+/.settings/
+/bin/res/
+/bin/dexedLibs/
+/bin/classes/
+*.apk
+*.dex
+*.cache
+*.txt
+*.ap_

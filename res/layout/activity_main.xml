@@ -1,0 +1,23 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingBottom="@dimen/margin_console"
+    android:paddingLeft="@dimen/margin_console"
+    android:paddingRight="@dimen/margin_console"
+    android:paddingTop="@dimen/margin_console"
+    tools:context="com.bsapundzhiev.bterminal.MainActivity" >
+
+    <com.bsapundzhiev.controls.ConsoleView
+        android:id="@+id/ConsoleView"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:layout_margin="0dp"
+        android:padding="2dp" 
+        android:ems="10"
+        android:scrollbars="vertical"
+        android:scrollbarAlwaysDrawVerticalTrack="true" >
+        <requestFocus />
+    </com.bsapundzhiev.controls.ConsoleView>
+
+</RelativeLayout>
