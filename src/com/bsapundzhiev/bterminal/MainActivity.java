@@ -5,8 +5,6 @@
  * 
  *  Licensed under GNU General Public License 3.0 or later. 
  *  Some rights reserved. See COPYING, AUTHORS.
- * 
- * @license GPL-3.0+ <http://spdx.org/licenses/GPL-3.0+>
  */
 package com.bsapundzhiev.bterminal;/**
  */
@@ -49,12 +47,10 @@ public class MainActivity extends ActionBarActivity {
     	  }
     		
     	  @Override
-    		
-    	  public void onChangePath(String newPath) {
-    			
-    		  console.set_promptString(newPath);
-    		
+    	  public void onProcessExit(String workingDirectory) {
+    		  console.set_promptString(workingDirectory);
     	  }
+    	  
     	  @Override
     	  public void onClearScreen() {
     		  console.getText().clear();	
@@ -64,9 +60,9 @@ public class MainActivity extends ActionBarActivity {
       
       if(commandExecuter == null) { 
     	  commandExecuter = new ConsoleCommandExecuter(); 
-    	  String hello = String.format(getString(R.string.Hello),
+    	  String hello = String.format("echo This is %s version %s type help for more.",
     			  getString(R.string.app_name), getString(R.string.version));
-    	  commandExecuter.execute("echo " + hello, iccec);
+    	  commandExecuter.execute(hello, iccec);
       }
       
       console.addConsoleCommandListener(new ConsoleCommandListener() {

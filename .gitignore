@@ -1,9 +1,8 @@
 /.settings/
-/bin/res/
-/bin/dexedLibs/
-/bin/classes/
+/bin/
 *.apk
 *.dex
 *.cache
 *.txt
 *.ap_
+*R.java

@@ -5,8 +5,6 @@
  * 
  *  Licensed under GNU General Public License 3.0 or later. 
  *  Some rights reserved. See COPYING, AUTHORS.
- * 
- * @license GPL-3.0+ <http://spdx.org/licenses/GPL-3.0+>
  */
 package com.bsapundzhiev.console;
 import java.io.IOException;
@@ -134,6 +132,7 @@ public class ConsoleCommandExecuter {
 			
 			@Override
 			public void run() {
+				
 				if(params[0].equalsIgnoreCase("cd")) {
 					try {
 						consoleProcBuilder.changeDir(params[1]);
@@ -144,10 +143,6 @@ public class ConsoleCommandExecuter {
 				
 				if(params[0].equalsIgnoreCase("pwd")) {
 					output.append(consoleProcBuilder.getCurrentWorkingDir() + "\n");
-				}
-				
-				if(params[0].equalsIgnoreCase("clear")) {
-					cbCommand.onClearScreen();
 				}
 				
 				if(params[0].equalsIgnoreCase("echo")) {
@@ -165,8 +160,12 @@ public class ConsoleCommandExecuter {
 			
 			@Override
 			public void run() {
-				cbCommand.onOutput(output.toString());
-				cbCommand.onChangePath(consoleProcBuilder.getCurrentWorkingDir());
+				if(params[0].equalsIgnoreCase("clear")) {
+					cbCommand.onClearScreen();
+				} else {
+					cbCommand.onOutput(output.toString());
+				}
+				cbCommand.onProcessExit(consoleProcBuilder.getCurrentWorkingDir());
 			}
 		}, null);
 	}
@@ -226,7 +225,7 @@ public class ConsoleCommandExecuter {
 			public void run() {
 				
 				cbCommand.onOutput(output.toString());
-				cbCommand.onChangePath(consoleProcBuilder.getCurrentWorkingDir());
+				cbCommand.onProcessExit(consoleProcBuilder.getCurrentWorkingDir());
 			}
 		}, cbCommand);
 	}

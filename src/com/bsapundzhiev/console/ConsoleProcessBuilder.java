@@ -5,8 +5,6 @@
  * 
  *  Licensed under GNU General Public License 3.0 or later. 
  *  Some rights reserved. See COPYING, AUTHORS.
- * 
- * @license GPL-3.0+ <http://spdx.org/licenses/GPL-3.0+>
  */
 package com.bsapundzhiev.console;
 
@@ -35,10 +33,11 @@ public class ConsoleProcessBuilder extends Object implements ConsoleBuilder {
 		processBuilder.directory(new File("/"));
 		processBuilder.redirectErrorStream(true);
 	}
-
+	
 	public boolean isRunning() {
 		return isRunning;
 	}
+	
 	protected synchronized void set_isRunning(boolean runnig) {
 		
 		  isRunning = runnig;
@@ -46,17 +45,26 @@ public class ConsoleProcessBuilder extends Object implements ConsoleBuilder {
 	
 	String getCurrentWorkingDir() {
 		
-		return processBuilder.directory().getAbsolutePath();
+		try {
+			String cwd = processBuilder.directory().getCanonicalPath();
+			if(cwd.isEmpty()) cwd = "/";
+			return cwd;
+		}catch (Exception e) {
+			//FIXME:
+			Log.d(DEBUG_TAG, e.getMessage());
+			return null;
+		}
 	}
 	
 	void changeDir(String path) throws Exception {
 		
 		String newPath = String.format("%s/%s", getCurrentWorkingDir(), path);
-		
 		File dir = new File(newPath);
 		if(dir.exists()) {
 			processBuilder.directory(dir);
-		} else throw new Exception(String.format("%s: no such file or directory", path));
+		} else {
+			throw new Exception(String.format("%s: no such file or directory", path));
+		}
 	}
 	
 	public String getEnv(String key) {
