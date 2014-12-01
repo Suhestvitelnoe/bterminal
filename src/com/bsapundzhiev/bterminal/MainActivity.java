@@ -6,9 +6,7 @@
  *  Licensed under GNU General Public License 3.0 or later. 
  *  Some rights reserved. See COPYING, AUTHORS.
  */
-package com.bsapundzhiev.bterminal;/**
- */
-
+package com.bsapundzhiev.bterminal;
 
 import com.bsapundzhiev.console.ConsoleCommandExecuter;
 import com.bsapundzhiev.console.IConsoleCommandExecuterCallback;
@@ -37,15 +35,15 @@ public class MainActivity extends ActionBarActivity {
     	   * {@inheritDoc ICommandExecuterCallback}
     	   */
     	  @Override
-    		
     	  public void onOutput(String output) {
     		  console.appendLine(output);	
     	  }
+    	  
     	  @Override
-    	  public void onProcessOutput(String line) {
+    	  public void onProcessOutput(final String line) {
     		  console.append(line);
-    	  }
-    		
+    	  }	
+    	  
     	  @Override
     	  public void onProcessExit(String workingDirectory) {
     		  console.set_promptString(workingDirectory);
@@ -57,10 +55,10 @@ public class MainActivity extends ActionBarActivity {
     	  }
       };
       Log.d(DEBUG_TAG, "OnCreate");
-      
+
       if(commandExecuter == null) { 
     	  commandExecuter = new ConsoleCommandExecuter(); 
-    	  String hello = String.format("echo This is %s version %s type help for more.",
+    	  String hello = String.format("echo %s v%s type help for more.",
     			  getString(R.string.app_name), getString(R.string.version));
     	  commandExecuter.execute(hello, iccec);
       }

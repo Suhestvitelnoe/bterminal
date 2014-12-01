@@ -182,14 +182,15 @@ public class ConsoleView extends EditText {
 	}
 
 	public void appendLine(String text) {
-
-		if (text.length() > 0) {
-
-			if (!text.endsWith("\n")) {
-				text = "\n" + text;
-			}
-			append(text);
+		
+		if (text.length() == 0) 
+			return;
+		
+		if (!text.endsWith("\n")) {	
+			text = "\n" + text;
 		}
+		
+		append(text);
 	}
 
 	public void set_promptString(String prompt) {

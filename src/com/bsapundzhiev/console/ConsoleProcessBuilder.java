@@ -30,7 +30,7 @@ public class ConsoleProcessBuilder extends Object implements ConsoleBuilder {
 	
 	public ConsoleProcessBuilder() {
 		Log.d(DEBUG_TAG, System.getProperty("user.dir"));
-		processBuilder.directory(new File("/"));
+		processBuilder.directory(new File(File.separator));
 		processBuilder.redirectErrorStream(true);
 	}
 	
@@ -47,7 +47,7 @@ public class ConsoleProcessBuilder extends Object implements ConsoleBuilder {
 		
 		try {
 			String cwd = processBuilder.directory().getCanonicalPath();
-			if(cwd.isEmpty()) cwd = "/";
+			if(cwd.length()  == 0) cwd = File.separator;
 			return cwd;
 		}catch (Exception e) {
 			//FIXME:
@@ -57,9 +57,13 @@ public class ConsoleProcessBuilder extends Object implements ConsoleBuilder {
 	}
 	
 	void changeDir(String path) throws Exception {
+	
+		if(!path.startsWith(File.separator)) { 	
+			path = String.format("%s/%s", getCurrentWorkingDir(), path);
+		}
 		
-		String newPath = String.format("%s/%s", getCurrentWorkingDir(), path);
-		File dir = new File(newPath);
+		File dir = new File(path);
+		
 		if(dir.exists()) {
 			processBuilder.directory(dir);
 		} else {

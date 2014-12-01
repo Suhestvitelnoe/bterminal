@@ -23,7 +23,7 @@ class ConsoleCommandTaskExecuter extends Thread {
 	/**
 	 * UI callback
 	 */
-	public Object callback;
+	public final Object callback;
 	private final Handler handler = new Handler();
 	
 	ConsoleCommandTaskExecuter(Runnable start, Runnable end, Object callback) {
@@ -51,7 +51,7 @@ class ConsoleCommandTaskExecuter extends Thread {
 }
 
 class ConsoleInputStreamConsumer extends Thread {
-	private static int  BUFF_LEN = 1024 / 2; 
+	private final int  BUFF_LEN = 1024; 
     private final InputStream inputStream;
     private final IConsoleCommandExecuterCallback consumer;
     private final ConsoleCommandTaskExecuter runningTask;
@@ -68,7 +68,7 @@ class ConsoleInputStreamConsumer extends Thread {
     	runningTask.postCallback(new Runnable() {
 			
 			@Override
-			public void run() {
+			public void run() {	
 				consumer.onProcessOutput(s);
 			}
 		});
@@ -78,19 +78,20 @@ class ConsoleInputStreamConsumer extends Thread {
     public void run() {
     	
     	final StringBuilder output = new StringBuilder();
+    	
         try {
-        	
+
             for(int c= 0; (c = inputStream.read()) != -1; ) {
-      
+            	
             	output.append((char)c);
             	
             	if(inputStream.available() == 0 || output.length() == BUFF_LEN) {
             		
             		Post(output.toString());
-					output.delete(0, output.length() - 1);
+            		output.delete(0, output.length() - 1);
             	}
             }
-
+            
         } catch (IOException e) {
             Log.d("ConsoleInputStreamConsumer", e.getMessage());
         }
@@ -135,7 +136,8 @@ public class ConsoleCommandExecuter {
 				
 				if(params[0].equalsIgnoreCase("cd")) {
 					try {
-						consoleProcBuilder.changeDir(params[1]);
+						String dir = (params.length == 1) ? File.separator : params[1];
+						consoleProcBuilder.changeDir(dir);
 					} catch (Exception e) {
 						output.append(e.getMessage() + "\n");
 					}
