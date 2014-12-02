@@ -7,7 +7,7 @@
  *  Some rights reserved. See COPYING, AUTHORS.
  */
 package com.bsapundzhiev.console;
-import java.io.IOException;
+import java.io.File;
 import java.io.InputStream;
 import java.io.OutputStream;
 import android.os.Handler;
@@ -20,33 +20,28 @@ class ConsoleCommandTaskExecuter extends Thread {
 	
 	private final Runnable startTask;
 	private final Runnable endTask;  
-	/**
-	 * UI callback
-	 */
-	public final Object callback;
+	public  final Object callback;
 	private final Handler handler = new Handler();
 	
 	ConsoleCommandTaskExecuter(Runnable start, Runnable end, Object callback) {
 		
-	    this.startTask = start;
-	    this.endTask = end;  
-	    this.callback = callback;
-	    start();
+		this.startTask = start;
+		this.endTask = end;  
+		this.callback = callback; 
+		start();
 	}
 	
 	@Override
 	public void run() {
-		
-		startTask.run();
+		startTask.run();	
 		handler.post(endTask);
 	}
 	
 	/**
 	 * Synch UI thread
 	 */
-	public void postCallback(Runnable task) {
-		
-		handler.post(task); 
+	public void postCallback(Runnable cb) {
+		handler.post(cb); 
 	}
 }
 
@@ -78,9 +73,7 @@ class ConsoleInputStreamConsumer extends Thread {
     public void run() {
     	
     	final StringBuilder output = new StringBuilder();
-    	
         try {
-
             for(int c= 0; (c = inputStream.read()) != -1; ) {
             	
             	output.append((char)c);
@@ -91,11 +84,10 @@ class ConsoleInputStreamConsumer extends Thread {
             		output.delete(0, output.length() - 1);
             	}
             }
-            
-        } catch (IOException e) {
-            Log.d("ConsoleInputStreamConsumer", e.getMessage());
+        } catch (Exception e) {
+            Log.d("ConsoleInputStreamConsumer:", e.getMessage());
         }
-    }
+    }   
 }
 
 public class ConsoleCommandExecuter {
@@ -104,9 +96,8 @@ public class ConsoleCommandExecuter {
 	private ConsoleProcessBuilder consoleProcBuilder = new ConsoleProcessBuilder();
 	private ConsoleCommandTaskExecuter currentTask;
 	private String[] commands = {"cd", "pwd", "echo", "clear"};
-	  
+
 	public ConsoleCommandExecuter() {
-		
 	}
 	
 	/**
@@ -125,7 +116,7 @@ public class ConsoleCommandExecuter {
 	 * @param params
 	 * @param cbCommand
 	 */
-	private void executeInternal(final String[] params, final IConsoleCommandExecuterCallback cbCommand) {
+	private void executeInternal(final String[] params,final IConsoleCommandExecuterCallback callback) {
 		
 		final StringBuffer output = new StringBuffer();
 		
@@ -163,11 +154,11 @@ public class ConsoleCommandExecuter {
 			@Override
 			public void run() {
 				if(params[0].equalsIgnoreCase("clear")) {
-					cbCommand.onClearScreen();
+					callback.onClearScreen();
 				} else {
-					cbCommand.onOutput(output.toString());
+					callback.onOutput(output.toString());
 				}
-				cbCommand.onProcessExit(consoleProcBuilder.getCurrentWorkingDir());
+				callback.onProcessExit(consoleProcBuilder.getCurrentWorkingDir());
 			}
 		}, null);
 	}
@@ -177,7 +168,7 @@ public class ConsoleCommandExecuter {
 	 * @param command
 	 * @param cbCommand
 	 */
-	public void execute(String command, final IConsoleCommandExecuterCallback cbCommand) {
+	public void execute(String command,final IConsoleCommandExecuterCallback callback) {
 		
 		final StringBuffer output = new StringBuffer();
 		final String[] params = command.split(" ");
@@ -185,7 +176,7 @@ public class ConsoleCommandExecuter {
 		for(int i=0; i < commands.length; i++) {
 			
 			if(params[0].equals(commands[i])) {
-				executeInternal(params, cbCommand);
+				executeInternal(params, callback);
 				return;
 			}
 		}	
@@ -201,19 +192,18 @@ public class ConsoleCommandExecuter {
 			@Override
 			public void run() {
 				try {
-					consoleProcBuilder.command( params );
-					consoleProcBuilder.start();
+					
+					consoleProcBuilder.start(params);
 					InputStream is = consoleProcBuilder.getProcess().getInputStream();
-					ConsoleInputStreamConsumer ic = new ConsoleInputStreamConsumer(is, currentTask);
+					ConsoleInputStreamConsumer ic = new ConsoleInputStreamConsumer(is, currentTask);	
 		    		consoleProcBuilder.waitFor();
-		    		ic.join();
-	
+		    		ic.join();	
 		        } catch (Exception e) {
 		        	
 		        	if(e.getMessage() != null) {
 		        		output.append(String.format("%s: command not found\n", params[0]));
 		        	} else {
-		        		e.printStackTrace();	
+		        		Log.d(DEBUG_TAG, "Intr: "+e.getMessage());
 		        	}
 		        	
 		        } finally {
@@ -226,10 +216,10 @@ public class ConsoleCommandExecuter {
 			@Override
 			public void run() {
 				
-				cbCommand.onOutput(output.toString());
-				cbCommand.onProcessExit(consoleProcBuilder.getCurrentWorkingDir());
+				callback.onOutput(output.toString());
+				callback.onProcessExit(consoleProcBuilder.getCurrentWorkingDir());
 			}
-		}, cbCommand);
+		}, callback);
 	}
 	
 	/**

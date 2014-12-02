@@ -1,4 +1,8 @@
 /.settings/
+/libs/armeabi/
+/libs/armeabi-v7a/
+/obj/
+/jni/
 /bin/
 *.apk
 *.dex

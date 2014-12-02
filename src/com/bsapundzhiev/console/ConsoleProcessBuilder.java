@@ -13,24 +13,22 @@ import java.io.IOException;
 import java.util.Map;
 import android.util.Log;
 
-interface ConsoleBuilder {
-	void start() throws IOException;
-	void command(String[] params);
+interface IConsoleBuilder {
+	void start(String[] params) throws IOException;
 	int waitFor() throws InterruptedException;
 	void destroy();
 }
 
-public class ConsoleProcessBuilder extends Object implements ConsoleBuilder {
+public class ConsoleProcessBuilder extends Object implements IConsoleBuilder {
 
 	private String DEBUG_TAG = "ConsoleProcessBuilder";
 	private ProcessBuilder processBuilder = new ProcessBuilder();
 	private Process process;
 	private boolean isRunning = false;
-	ConsoleCommandTaskExecuter task;
 	
 	public ConsoleProcessBuilder() {
-		Log.d(DEBUG_TAG, System.getProperty("user.dir"));
-		processBuilder.directory(new File(File.separator));
+		String initPath ="/data/local/tmp"; //System.getProperty("user.dir");
+		processBuilder.directory(new File(initPath));
 		processBuilder.redirectErrorStream(true);
 	}
 	
@@ -38,8 +36,7 @@ public class ConsoleProcessBuilder extends Object implements ConsoleBuilder {
 		return isRunning;
 	}
 	
-	protected synchronized void set_isRunning(boolean runnig) {
-		
+	private void set_isRunning(boolean runnig) {
 		  isRunning = runnig;
 	}
 	
@@ -47,10 +44,8 @@ public class ConsoleProcessBuilder extends Object implements ConsoleBuilder {
 		
 		try {
 			String cwd = processBuilder.directory().getCanonicalPath();
-			if(cwd.length()  == 0) cwd = File.separator;
-			return cwd;
+			return (cwd.length()  == 0) ?  File.separator: cwd;
 		}catch (Exception e) {
-			//FIXME:
 			Log.d(DEBUG_TAG, e.getMessage());
 			return null;
 		}
@@ -60,6 +55,7 @@ public class ConsoleProcessBuilder extends Object implements ConsoleBuilder {
 	
 		if(!path.startsWith(File.separator)) { 	
 			path = String.format("%s/%s", getCurrentWorkingDir(), path);
+			Log.d(DEBUG_TAG, path);
 		}
 		
 		File dir = new File(path);
@@ -103,8 +99,8 @@ public class ConsoleProcessBuilder extends Object implements ConsoleBuilder {
 	}
 	
 	@Override
-	public void start() throws IOException {
-		
+	public void start(String[] params) throws IOException {
+		processBuilder.command(params);
 		process = processBuilder.start();
 		set_isRunning(true);
 	}
@@ -122,12 +118,5 @@ public class ConsoleProcessBuilder extends Object implements ConsoleBuilder {
 	public int waitFor() throws InterruptedException {
 		
 		return process.waitFor();
-	}
-
-	@Override
-	public void command(String[] params) {
-		
-		processBuilder.command(params);
-	}
-	
+	}	
 }
