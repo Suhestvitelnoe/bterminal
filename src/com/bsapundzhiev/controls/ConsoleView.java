@@ -174,7 +174,7 @@ public class ConsoleView extends EditText {
 			public boolean onLongClick(View v) {
 				// TODO: pop up command menu
 				Toast.makeText(getContext(), "Send Ctrl+C", Toast.LENGTH_SHORT)
-						.show();
+				.show();
 				onCommandBreak(ConsoleBreak.CTRLC);
 				return true;
 			}
@@ -182,14 +182,14 @@ public class ConsoleView extends EditText {
 	}
 
 	public void appendLine(String text) {
-		
+
 		if (text.length() == 0) 
 			return;
-		
+
 		if (!text.endsWith("\n")) {	
 			text = "\n" + text;
 		}
-		
+
 		append(text);
 	}
 

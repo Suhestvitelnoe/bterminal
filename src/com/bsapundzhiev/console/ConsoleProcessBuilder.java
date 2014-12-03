@@ -25,23 +25,23 @@ public class ConsoleProcessBuilder extends Object implements IConsoleBuilder {
 	private ProcessBuilder processBuilder = new ProcessBuilder();
 	private Process process;
 	private boolean isRunning = false;
-	
+
 	public ConsoleProcessBuilder() {
 		String initPath ="/data/local/tmp"; //System.getProperty("user.dir");
 		processBuilder.directory(new File(initPath));
 		processBuilder.redirectErrorStream(true);
 	}
-	
+
 	public boolean isRunning() {
 		return isRunning;
 	}
-	
+
 	private void set_isRunning(boolean runnig) {
-		  isRunning = runnig;
+		isRunning = runnig;
 	}
-	
+
 	String getCurrentWorkingDir() {
-		
+
 		try {
 			String cwd = processBuilder.directory().getCanonicalPath();
 			return (cwd.length()  == 0) ?  File.separator: cwd;
@@ -50,54 +50,54 @@ public class ConsoleProcessBuilder extends Object implements IConsoleBuilder {
 			return null;
 		}
 	}
-	
+
 	void changeDir(String path) throws Exception {
-	
+
 		if(!path.startsWith(File.separator)) { 	
 			path = String.format("%s/%s", getCurrentWorkingDir(), path);
 			Log.d(DEBUG_TAG, path);
 		}
-		
+
 		File dir = new File(path);
-		
+
 		if(dir.exists()) {
 			processBuilder.directory(dir);
 		} else {
 			throw new Exception(String.format("%s: no such file or directory", path));
 		}
 	}
-	
+
 	public String getEnv(String key) {
 
 		Map<String, String> environ = processBuilder.environment();
 		for (Map.Entry<String, String> e : environ.entrySet()) {
-		    
-		    if( e.getKey().equalsIgnoreCase(key) ){
-		    	
-		    	return e.getValue();	
-		    }
+
+			if( e.getKey().equalsIgnoreCase(key) ){
+
+				return e.getValue();	
+			}
 		}
 		return null;
 	}
-	
+
 	public void setEnv(String key, String val) {
 
 		Map<String, String> environ = processBuilder.environment();
 		for (Map.Entry<String, String> e : environ.entrySet()) {
-			
+
 			if( e.getKey().equalsIgnoreCase(key) ) {
 				e.setValue(val);
 				Log.d(DEBUG_TAG, "setEnv: "+ e.getKey().toString() +" = "+ e.getValue().toString() );
 				break;
-		    }
-		    
+			}
+
 		}
 	}
-	
+
 	public Process getProcess () {
 		return process;
 	}
-	
+
 	@Override
 	public void start(String[] params) throws IOException {
 		processBuilder.command(params);
@@ -107,7 +107,7 @@ public class ConsoleProcessBuilder extends Object implements IConsoleBuilder {
 
 	@Override
 	public void destroy() {
-		
+
 		if(isRunning) {
 			set_isRunning(false);
 			process.destroy();
@@ -116,7 +116,7 @@ public class ConsoleProcessBuilder extends Object implements IConsoleBuilder {
 
 	@Override
 	public int waitFor() throws InterruptedException {
-		
+
 		return process.waitFor();
 	}	
 }
