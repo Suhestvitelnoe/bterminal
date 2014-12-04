@@ -97,7 +97,7 @@ public class ConsoleCommandExecuter {
 	private String DEBUG_TAG = "CommandExecuter";
 	private ConsoleProcessBuilder consoleProcBuilder = new ConsoleProcessBuilder();
 	private ConsoleCommandTaskExecuter currentTask;
-	private String[] commands = {"cd", "pwd", "echo", "clear"};
+	private String[] commands = {"cd", "pwd", "echo", "clear","exit"};
 
 	public ConsoleCommandExecuter() {
 	}
@@ -141,11 +141,9 @@ public class ConsoleCommandExecuter {
 				}
 
 				if(params[0].equalsIgnoreCase("echo")) {
-
+					
 					for(int i=1; i < params.length; i++) {
-						String out = (i == 1) ? String.format("%s",params[i]) 
-								: String.format(" %s", params[i]);
-						output.append(out);
+						output.append(String.format("%s ",params[i]));
 					}
 					output.append("\n");
 				}
@@ -155,12 +153,15 @@ public class ConsoleCommandExecuter {
 
 			@Override
 			public void run() {
-				if(params[0].equalsIgnoreCase("clear")) {
+				if(params[0].equalsIgnoreCase("exit")){
+					callback.onProcessExit();
+				}
+				else if(params[0].equalsIgnoreCase("clear")) {
 					callback.onClearScreen();
 				} else {
 					callback.onOutput(output.toString());
 				}
-				callback.onProcessExit(consoleProcBuilder.getCurrentWorkingDir());
+				callback.onProcessEnd(consoleProcBuilder.getCurrentWorkingDir());
 			}
 		}, null);
 	}
@@ -184,8 +185,7 @@ public class ConsoleCommandExecuter {
 		}	
 
 		if(consoleProcBuilder.isRunning()) {
-			command +="\n";
-			writeToCurrentTaskOutput(command.getBytes());
+			writeToCurrentTaskOutput((command+"\n").getBytes());
 			return;
 		}
 
@@ -215,7 +215,7 @@ public class ConsoleCommandExecuter {
 			public void run() {
 
 				callback.onOutput(output.toString());
-				callback.onProcessExit(consoleProcBuilder.getCurrentWorkingDir());
+				callback.onProcessEnd(consoleProcBuilder.getCurrentWorkingDir());
 			}
 		}, callback);
 	}

@@ -56,13 +56,19 @@ public class MainActivity extends ActionBarActivity {
 			}	
 
 			@Override
-			public void onProcessExit(String workingDirectory) {
+			public void onProcessEnd(String workingDirectory) {
 				console.set_promptString(String.format("%s@%s",user, workingDirectory));
 			}
 
 			@Override
 			public void onClearScreen() {
 				console.getText().clear();	
+			}
+
+			@Override
+			public void onProcessExit() {
+				// TODO Auto-generated method stub
+				
 			}
 		};
 		Log.d(DEBUG_TAG, "OnCreate");

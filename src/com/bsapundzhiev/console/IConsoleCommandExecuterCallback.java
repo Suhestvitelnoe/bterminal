@@ -23,9 +23,10 @@ public interface IConsoleCommandExecuterCallback {
 	 * Command finish
 	 * @param {@link String} newPath
 	 */
-	void onProcessExit(String workingDirectory);
+	void onProcessEnd(String workingDirectory);
 	/**
 	 * Clear screen 
 	 */
 	void onClearScreen();
+	void onProcessExit();
 }

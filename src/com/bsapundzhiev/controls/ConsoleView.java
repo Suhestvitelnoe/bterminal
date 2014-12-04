@@ -14,21 +14,26 @@ import java.util.List;
 
 import com.bsapundzhiev.controls.ConsoleCommandListener.ConsoleBreak;
 
+import android.R;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Typeface;
+import android.support.v7.widget.PopupMenu;
 import android.text.InputType;
 import android.text.method.ScrollingMovementMethod;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.KeyEvent;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputConnection;
 import android.view.inputmethod.InputConnectionWrapper;
 import android.widget.EditText;
+
 import android.widget.Toast;
 
 public class ConsoleView extends EditText {
@@ -176,6 +181,24 @@ public class ConsoleView extends EditText {
 				Toast.makeText(getContext(), "Send Ctrl+C", Toast.LENGTH_SHORT)
 				.show();
 				onCommandBreak(ConsoleBreak.CTRLC);
+				
+				PopupMenu myPopup = new PopupMenu(ConsoleView.this.getContext(),ConsoleView.this);
+				Menu m = myPopup.getMenu();
+				//m.add(0, 1, 0, "test");
+				//m.add(0, 2, 1, "clear");
+				
+				myPopup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+					
+					@Override
+					public boolean onMenuItemClick(MenuItem arg0) {
+						// TODO Auto-generated method stub
+						Log.d(DEBUG_TAG, arg0.toString());
+						ConsoleView.this.append(arg0.toString());
+						return false;
+					}
+				});
+				myPopup.show();
+				
 				return true;
 			}
 		});
