@@ -13,21 +13,18 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.bsapundzhiev.controls.ConsoleCommandListener.ConsoleBreak;
-
-import android.R;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Typeface;
-import android.support.v7.widget.PopupMenu;
 import android.text.InputType;
 import android.text.method.ScrollingMovementMethod;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.KeyEvent;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputConnection;
@@ -42,7 +39,7 @@ public class ConsoleView extends EditText {
 	private String DEBUG_TAG = "ConsoleView";
 	private StringBuilder _commandBuilder = new StringBuilder();
 	private String _promptString;
-
+	private ArrayList<String> _history = new ArrayList<String>();
 	/**
 	 * command interface
 	 */
@@ -177,29 +174,35 @@ public class ConsoleView extends EditText {
 
 			@Override
 			public boolean onLongClick(View v) {
-				// TODO: pop up command menu
-				Toast.makeText(getContext(), "Send Ctrl+C", Toast.LENGTH_SHORT)
-				.show();
-				onCommandBreak(ConsoleBreak.CTRLC);
+
+				ArrayList<String> tmp = new ArrayList<String>(_history);
+				tmp.add(0, "ctrl+c");
+				tmp.add(1, "clear");
+				final String[] items =tmp.toArray(new String[0]);
 				
-				PopupMenu myPopup = new PopupMenu(ConsoleView.this.getContext(),ConsoleView.this);
-				Menu m = myPopup.getMenu();
-				//m.add(0, 1, 0, "test");
-				//m.add(0, 2, 1, "clear");
-				
-				myPopup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
-					
-					@Override
-					public boolean onMenuItemClick(MenuItem arg0) {
-						// TODO Auto-generated method stub
-						Log.d(DEBUG_TAG, arg0.toString());
-						ConsoleView.this.append(arg0.toString());
-						return false;
-					}
+				AlertDialog.Builder builder = new AlertDialog.Builder(getContext());    
+				builder.setItems(items, new DialogInterface.OnClickListener() {
+				            
+					public void onClick(DialogInterface dialog, int which) {    
+						
+						switch (which) {
+						case 0:
+							onCommandBreak(ConsoleBreak.CTRLC);
+							break;
+						case 1:
+							onCommand(items[which]);
+						default:
+							append(items[which]);
+							_commandBuilder.append(items[which]); 
+							break;
+						}    
+						
+						Toast.makeText(getContext(), 
+								"Send "+ items[which], Toast.LENGTH_SHORT).show();
+					}       
 				});
-				myPopup.show();
 				
-				return true;
+				return builder.show().isShowing();
 			}
 		});
 	}
@@ -242,7 +245,7 @@ public class ConsoleView extends EditText {
 	}
 
 	void onCommand(String command) {
-
+		_history.add(command);
 		for (ConsoleCommandListener commandlistener : commandListeners) {
 			commandlistener.onCommand(command);
 		}
