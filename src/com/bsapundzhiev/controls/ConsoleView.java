@@ -37,9 +37,9 @@ public class ConsoleView extends EditText {
 
 	public static String propmptSign = "$";
 	private String DEBUG_TAG = "ConsoleView";
-	private StringBuilder _commandBuilder = new StringBuilder();
+	private static StringBuilder _commandBuilder = new StringBuilder();
 	private String _promptString;
-	private ArrayList<String> _history = new ArrayList<String>();
+	private static ArrayList<String> _history = new ArrayList<String>();
 	/**
 	 * command interface
 	 */
@@ -66,9 +66,10 @@ public class ConsoleView extends EditText {
 	@Override
 	protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
 
-		// TODO Auto-generated method stub
+		// TODO fixme
 		if (_commandBuilder.length() > 0) {
-			_commandBuilder.delete(0, _commandBuilder.length() - 1);
+			onCommand("clear");
+			_commandBuilder.delete(0, _commandBuilder.length());
 		}
 		super.onMeasure(widthMeasureSpec, heightMeasureSpec);
 	}
@@ -229,6 +230,10 @@ public class ConsoleView extends EditText {
 		return _promptString;
 	}
 
+	public void addToHistory(String command) {
+		_history.add(command);
+	}
+	
 	/**
 	 * {@link ConsoleCommandListener}
 	 * 
@@ -245,7 +250,7 @@ public class ConsoleView extends EditText {
 	}
 
 	void onCommand(String command) {
-		_history.add(command);
+		
 		for (ConsoleCommandListener commandlistener : commandListeners) {
 			commandlistener.onCommand(command);
 		}

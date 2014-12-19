@@ -68,7 +68,7 @@ public class MainActivity extends ActionBarActivity {
 			@Override
 			public void onProcessExit() {
 				// TODO Auto-generated method stub
-				
+				finish();
 			}
 		};
 		Log.d(DEBUG_TAG, "OnCreate");
@@ -86,6 +86,7 @@ public class MainActivity extends ActionBarActivity {
 			public void onCommand(String newCommand) {   
 				super.onCommand(newCommand);	   
 				commandExecuter.execute(newCommand, iccec);
+				console.addToHistory(newCommand);
 			}
 
 			@Override
