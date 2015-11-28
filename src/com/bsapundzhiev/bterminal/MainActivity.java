@@ -13,6 +13,8 @@ import com.bsapundzhiev.console.IConsoleCommandExecuterCallback;
 import com.bsapundzhiev.controls.ConsoleCommandListener;
 import com.bsapundzhiev.controls.ConsoleView;
 import android.support.v7.app.ActionBarActivity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
@@ -111,6 +113,22 @@ public class MainActivity extends ActionBarActivity {
 		// as you specify a parent activity in AndroidManifest.xml.
 		int id = item.getItemId();
 		if (id == R.id.action_settings) {
+			return true;
+		}
+		if (id == R.id.action_about) {
+			String aboutMsg = String.format("%s v%s\nauthor: %s\n",
+					getString(R.string.app_name), getString(R.string.version),
+					getString(R.string.author));
+			
+			AlertDialog alertDialog = new AlertDialog.Builder(this)
+	          .setTitle("About").setMessage(aboutMsg).setCancelable(false)
+	          .setPositiveButton("OK", new AlertDialog.OnClickListener() {
+				@Override
+				public void onClick(DialogInterface dialog, int which) {
+					dialog.cancel();
+				}
+	        }).create();
+	        alertDialog.show();
 			return true;
 		}
 		return super.onOptionsItemSelected(item);

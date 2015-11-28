@@ -97,11 +97,55 @@ public class ConsoleCommandExecuter {
 	private String DEBUG_TAG = "CommandExecuter";
 	private ConsoleProcessBuilder consoleProcBuilder = new ConsoleProcessBuilder();
 	private ConsoleCommandTaskExecuter currentTask;
-	private String[] commands = {"cd", "pwd", "echo", "clear","exit"};
-
+	
+	private ConsoleCommandFactory _commandFactory = new ConsoleCommandFactory();
+	
 	public ConsoleCommandExecuter() {
+		//TODO: init commands
+		_commandFactory.addCommand("cd", new IBtermCommand() {
+			@Override
+			public void exec(String params[], StringBuffer output)  {
+				String dir = (params.length == 1) ? File.separator : params[1];
+				try {
+					consoleProcBuilder.changeDir(dir);
+				} catch (Exception e) {
+					output.append(e.getMessage() + "\n");
+				}
+			}
+		});
+		_commandFactory.addCommand("pwd", new IBtermCommand() {
+			@Override
+			public void exec(String[] params, StringBuffer output) {
+				output.append(consoleProcBuilder.getCurrentWorkingDir() + "\n");
+			}
+		});
+		_commandFactory.addCommand("echo", new IBtermCommand() {
+			@Override
+			public void exec(String[] params, StringBuffer output) {
+				for(int i=1; i < params.length; i++) {
+					output.append(String.format("%s ", params[i]));
+				}
+				output.append("\n");
+			}
+		});
+		_commandFactory.addCommand("help", new IBtermCommand() {
+			
+			@Override
+			public void exec(String[] params, StringBuffer output) {
+				output.append(_commandFactory.listCommands());
+			}
+		});
 	}
-
+	
+	/**
+	 * Add custom command to executer
+	 * @param name
+	 * @param command
+	 */
+	public void addCommand(String name, IBtermCommand command) {
+		_commandFactory.addCommand(name, command);
+	}
+	
 	/**
 	 * Stop running task
 	 */
@@ -112,78 +156,18 @@ public class ConsoleCommandExecuter {
 			currentTask.interrupt();
 		}
 	}
-
-	/**
-	 * Internal basic shell commands
-	 * @param params
-	 * @param cbCommand
-	 */
-	private void executeInternal(final String[] params,final IConsoleCommandExecuterCallback callback) {
-
-		final StringBuffer output = new StringBuffer();
-
-		currentTask  = new ConsoleCommandTaskExecuter(new Runnable() {
-
-			@Override
-			public void run() {
-
-				if(params[0].equalsIgnoreCase("cd")) {
-					try {
-						String dir = (params.length == 1) ? File.separator : params[1];
-						consoleProcBuilder.changeDir(dir);
-					} catch (Exception e) {
-						output.append(e.getMessage() + "\n");
-					}
-				}
-
-				if(params[0].equalsIgnoreCase("pwd")) {
-					output.append(consoleProcBuilder.getCurrentWorkingDir() + "\n");
-				}
-
-				if(params[0].equalsIgnoreCase("echo")) {
-					
-					for(int i=1; i < params.length; i++) {
-						output.append(String.format("%s ",params[i]));
-					}
-					output.append("\n");
-				}
-			}
-
-		}, new Runnable() {
-
-			@Override
-			public void run() {
-				if(params[0].equalsIgnoreCase("exit")){
-					callback.onProcessExit();
-				}
-				else if(params[0].equalsIgnoreCase("clear")) {
-					callback.onClearScreen();
-				} else {
-					callback.onOutput(output.toString());
-				}
-				callback.onProcessEnd(consoleProcBuilder.getCurrentWorkingDir());
-			}
-		}, null);
-	}
-
+	
 	/**
 	 * Create console job 
 	 * @param command
 	 * @param cbCommand
 	 */
 	public void execute(String command,final IConsoleCommandExecuterCallback callback) {
-
+		
 		final StringBuffer output = new StringBuffer();
 		final String[] params = command.split(" ");
-
-		for(int i=0; i < commands.length; i++) {
-
-			if(params[0].equals(commands[i])) {
-				executeInternal(params, callback);
-				return;
-			}
-		}	
-
+		final IBtermCommand cmd = _commandFactory.getCommand(params[0]);
+		
 		if(consoleProcBuilder.isRunning()) {
 			writeToCurrentTaskOutput((command+"\n").getBytes());
 			return;
@@ -194,11 +178,16 @@ public class ConsoleCommandExecuter {
 			@Override
 			public void run() {
 				try {
-					consoleProcBuilder.start(params);
-					InputStream is = consoleProcBuilder.getProcess().getInputStream();
-					ConsoleInputStreamConsumer ic = new ConsoleInputStreamConsumer(is, currentTask);	
-					consoleProcBuilder.waitFor();
-					ic.join();	
+					if(cmd != null) {
+						cmd.exec(params, output);
+					} else {
+						consoleProcBuilder.start(params);
+						InputStream is = consoleProcBuilder.getProcess().getInputStream();
+						ConsoleInputStreamConsumer ic = new ConsoleInputStreamConsumer(is, currentTask);	
+						consoleProcBuilder.waitFor();
+						ic.join();
+					}
+	
 				} catch (IOException e) {
 					output.append(String.format("Error running exec(). Command:[%s]\n", params[0]));
 				} catch (InterruptedException ie) {
@@ -213,8 +202,14 @@ public class ConsoleCommandExecuter {
 
 			@Override
 			public void run() {
-
-				callback.onOutput(output.toString());
+				if(params[0].equalsIgnoreCase("exit")){
+					callback.onProcessExit();
+				}
+				else if(params[0].equalsIgnoreCase("clear")) {
+					callback.onClearScreen();
+				} else {
+					callback.onOutput(output.toString());
+				}
 				callback.onProcessEnd(consoleProcBuilder.getCurrentWorkingDir());
 			}
 		}, callback);
