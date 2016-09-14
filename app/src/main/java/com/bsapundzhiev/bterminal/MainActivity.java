@@ -19,11 +19,12 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
-public class MainActivity extends ActionBarActivity {
+public class MainActivity extends AppCompatActivity {
 	private String DEBUG_TAG = "MainActivity";
 	private static ConsoleCommandExecuter commandExecuter;
 
@@ -64,7 +65,8 @@ public class MainActivity extends ActionBarActivity {
 
 			@Override
 			public void onClearScreen() {
-				console.getText().clear();	
+
+				console.getText().clear();
 			}
 
 			@Override
@@ -77,8 +79,7 @@ public class MainActivity extends ActionBarActivity {
 
 		if(commandExecuter == null) { 
 			commandExecuter = new ConsoleCommandExecuter(); 
-			String hello = String.format("echo %s v%s type help for more.",
-					getString(R.string.app_name), getString(R.string.version));
+			String hello = String.format("echo %s v%s type help for more.", getString(R.string.app_name), getString(R.string.version));
 			commandExecuter.execute(hello, iccec);
 		}
 

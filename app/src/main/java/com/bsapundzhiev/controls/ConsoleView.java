@@ -39,11 +39,11 @@ public class ConsoleView extends EditText {
 	private String DEBUG_TAG = "ConsoleView";
 	private static StringBuilder _commandBuilder = new StringBuilder();
 	private String _promptString;
-	private static ArrayList<String> _history = new ArrayList<String>();
+	private static ArrayList<String> _history = new ArrayList<>();
 	/**
 	 * command interface
 	 */
-	protected List<ConsoleCommandListener> commandListeners = new ArrayList<ConsoleCommandListener>();
+	protected List<ConsoleCommandListener> commandListeners = new ArrayList<>();
 
 	public ConsoleView(Context context) {
 
@@ -82,7 +82,7 @@ public class ConsoleView extends EditText {
 
 	private class ConsoleInputConnection extends InputConnectionWrapper {
 
-		private Boolean backTag;
+		private Boolean backTag = true;
 
 		public ConsoleInputConnection(InputConnection target, boolean mutable) {
 			super(target, mutable);
@@ -92,14 +92,21 @@ public class ConsoleView extends EditText {
 		public boolean sendKeyEvent(KeyEvent event) {
 
 			if (event.getAction() == KeyEvent.ACTION_DOWN
-					&& event.getKeyCode() == KeyEvent.KEYCODE_DEL) {
+						&& event.getKeyCode() == KeyEvent.KEYCODE_DEL) {
 
-				// cancel the backspace if buffer is empty
-				if (backTag == true) {
+					// cancel the backspace if buffer is empty
+					if (backTag == true) {
+						return false;
+					}
+			}
+
+			if(event.getAction() == KeyEvent.ACTION_DOWN
+						&& event.getKeyCode() == KeyEvent.KEYCODE_ENTER) {
+				Log.d(DEBUG_TAG, "Enter");
+				if(!performCommand()) {
 					return false;
 				}
 			}
-
 			return super.sendKeyEvent(event);
 		}
 
@@ -127,9 +134,8 @@ public class ConsoleView extends EditText {
 		@Override
 		public boolean commitText(CharSequence text, int newCursorPosition) {
 
-			// Log.d(DEBUG_TAG, "commitText:[" + text.toString() +"]");
-
-			if (text.toString().equalsIgnoreCase("\n")) {
+			//Log.d(DEBUG_TAG, "commitText:[" + text.toString() +"]");
+			/*if (text.toString().equalsIgnoreCase("\n")) {
 
 				if (_commandBuilder.length() > 0) {
 					onCommand(_commandBuilder.toString());
@@ -141,8 +147,8 @@ public class ConsoleView extends EditText {
 			} else {
 
 				_commandBuilder.append(text);
-			}
-
+			}*/
+			_commandBuilder.append(text);
 			return super.commitText(text, newCursorPosition);
 		}
 	}
@@ -152,6 +158,18 @@ public class ConsoleView extends EditText {
 
 		setSelection(getText().length());
 		super.onDraw(canvas);
+	}
+
+    private boolean performCommand() {
+
+		if (_commandBuilder.length() > 0) {
+			onCommand(_commandBuilder.toString());
+			_commandBuilder.delete(0, _commandBuilder.length());
+			return true;
+		} else {
+			// skip empty lines
+			return false;
+		}
 	}
 
 	private void ConsoleViewInit() {
@@ -224,10 +242,6 @@ public class ConsoleView extends EditText {
 
 		_promptString = prompt;
 		append(String.format("%s%s", _promptString, ConsoleView.propmptSign));
-	}
-
-	public String get_promptString() {
-		return _promptString;
 	}
 
 	public void addToHistory(String command) {
