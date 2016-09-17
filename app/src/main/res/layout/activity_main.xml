@@ -9,6 +9,7 @@
     tools:context="com.bsapundzhiev.bterminal.MainActivity" >
 
     <com.bsapundzhiev.controls.ConsoleView
+        android:textCursorDrawable="@drawable/console_cursor"
         android:id="@+id/ConsoleView"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"

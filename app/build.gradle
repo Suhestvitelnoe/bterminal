@@ -6,7 +6,7 @@ android {
 
     defaultConfig {
         applicationId "com.bsapundzhiev.bterminal"
-        minSdkVersion 8
+        minSdkVersion 12
         targetSdkVersion 23
         compileOptions {
             sourceCompatibility JavaVersion.VERSION_1_7

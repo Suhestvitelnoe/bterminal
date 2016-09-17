@@ -35,11 +35,11 @@ import android.widget.Toast;
 
 public class ConsoleView extends EditText {
 
-	public static String propmptSign = "$";
+	public static String propmptSign = "$ ";
 	private String DEBUG_TAG = "ConsoleView";
-	private static StringBuilder _commandBuilder = new StringBuilder();
 	private String _promptString;
 	private static ArrayList<String> _history = new ArrayList<>();
+    private static StringBuilder _commandBuilder = new StringBuilder();
 	/**
 	 * command interface
 	 */
@@ -82,8 +82,6 @@ public class ConsoleView extends EditText {
 
 	private class ConsoleInputConnection extends InputConnectionWrapper {
 
-		private Boolean backTag = true;
-
 		public ConsoleInputConnection(InputConnection target, boolean mutable) {
 			super(target, mutable);
 		}
@@ -93,11 +91,11 @@ public class ConsoleView extends EditText {
 
 			if (event.getAction() == KeyEvent.ACTION_DOWN
 						&& event.getKeyCode() == KeyEvent.KEYCODE_DEL) {
-
-					// cancel the backspace if buffer is empty
-					if (backTag == true) {
-						return false;
-					}
+				// cancel the backspace if buffer is empty
+				if (_commandBuilder.length() == 0) {
+					return false;
+				}
+				_commandBuilder.deleteCharAt(_commandBuilder.length() - 1);
 			}
 
 			if(event.getAction() == KeyEvent.ACTION_DOWN
@@ -111,43 +109,9 @@ public class ConsoleView extends EditText {
 		}
 
 		@Override
-		public boolean deleteSurroundingText(int beforeLength, int afterLength) {
-
-			backTag = (_commandBuilder.length() == 0) ? true : false;
-
-			if (_commandBuilder.length() > 0) {
-				_commandBuilder.deleteCharAt(_commandBuilder.length() - 1);
-			}
-
-			// deleteSurroundingText(1, 0) will be called for backspace
-			if (beforeLength == 1 && afterLength == 0) {
-				// backspace
-				return sendKeyEvent(new KeyEvent(KeyEvent.ACTION_DOWN,
-						KeyEvent.KEYCODE_DEL))
-						&& sendKeyEvent(new KeyEvent(KeyEvent.ACTION_UP,
-								KeyEvent.KEYCODE_DEL));
-			}
-
-			return super.deleteSurroundingText(beforeLength, afterLength);
-		}
-
-		@Override
 		public boolean commitText(CharSequence text, int newCursorPosition) {
 
 			//Log.d(DEBUG_TAG, "commitText:[" + text.toString() +"]");
-			/*if (text.toString().equalsIgnoreCase("\n")) {
-
-				if (_commandBuilder.length() > 0) {
-					onCommand(_commandBuilder.toString());
-					_commandBuilder.delete(0, _commandBuilder.length());
-				} else {
-					// skip empty lines
-					return false;
-				}
-			} else {
-
-				_commandBuilder.append(text);
-			}*/
 			_commandBuilder.append(text);
 			return super.commitText(text, newCursorPosition);
 		}
@@ -179,6 +143,7 @@ public class ConsoleView extends EditText {
 		setTextColor(Color.GREEN);
 		setTextSize(11);
 		setTypeface(Typeface.MONOSPACE);
+        //setCursorVisible(false);
 
 		setInputType(InputType.TYPE_CLASS_TEXT
 				| InputType.TYPE_TEXT_FLAG_MULTI_LINE
@@ -251,7 +216,7 @@ public class ConsoleView extends EditText {
 	/**
 	 * {@link ConsoleCommandListener}
 	 * 
-	 * @param evt
+	 * @param ConsoleCommandListener
 	 */
 	public void addConsoleCommandListener(ConsoleCommandListener listener) {
 
@@ -265,15 +230,15 @@ public class ConsoleView extends EditText {
 
 	void onCommand(String command) {
 		
-		for (ConsoleCommandListener commandlistener : commandListeners) {
-			commandlistener.onCommand(command);
+		for (ConsoleCommandListener commandListener : commandListeners) {
+			commandListener.onCommand(command);
 		}
 	}
 
 	void onCommandBreak(ConsoleBreak type) {
 
-		for (ConsoleCommandListener commandlistener : commandListeners) {
-			commandlistener.onCommandBreak(type);
+		for (ConsoleCommandListener commandListener : commandListeners) {
+			commandListener.onCommandBreak(type);
 		}
 	}
 }
